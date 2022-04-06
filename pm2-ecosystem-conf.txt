@@ -1,0 +1,277 @@
+TASK-2:
+Today look into PM2 commands and options.
+Pass environment variables to your projects via PM2 configuration file
+Analyze and list what are all the configurations that we can tweak using pm2 configurations.
+Enable logging in PM2 for your project and goal is to log out and error logs with timestamp in a particular directory.
+
+
+
+
+->pm2 ecosystem
+->vi ecosystem.config.js
+ 
+ module.exports = {
+  apps : [{
+    name        : "node",
+    script      : "/home/ec2-user/index.js", // path needs to be relative from ecosystem.config.js
+    watch       : true, // any changes to app folder will get pm2 to restart app
+    env         : {
+      "NODE_ENV": "development", // define env variables here
+    }
+  }]
+}
+
+->pm2 start ecosystem.config.js
+->pm2 logs
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PORT BASED:
+
+->vi index.js
+
+  var http = require('http');
+var port = process.env.PORT
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('BEAST\n');
+}).listen(port,'0.0.0.0');
+console.log('Server running at http://node:8080');
+
+->vi index1.js
+
+ var http = require('http');
+var port = process.env.PORT
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('KGF=2\n');
+}).listen(port,'0.0.0.0');
+console.log('Server running at http://node:8080');
+
+
+->vi ecosystem.config.js
+
+ module.exports = {
+  apps : [
+    {
+      "name": "node",
+      "script": "/home/ec2-user/index.js",
+      "env" : {
+         PORT: 8080
+      }
+},
+  {
+      "name": "node1",
+      "script": "/home/ec2-user/index1.js",
+      "env" : {
+         PORT: 3000
+      }
+}
+]
+}
+
+TO RUN=====> pm2 start ecosystem.config.js --only node (or) node1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+module.exports={
+  apps : [
+    {
+      name: 'REACTJS',
+      script: 'client/src/index.js',
+      instances: 1, 
+      autorestart: true,
+      watch: true,
+      max_memory_restart: '1G',
+      env: {
+        NODE_ENV: 'development',
+        port:80,
+        sitename:'React.js Website'
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        port:80,
+        sitename:'React.js Website'
+      }
+    },
+    {
+      name: 'NODEJS',
+      script: 'server/node.js',
+      instances: 1,
+      autorestart: true,
+      watch: true,
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'development',
+        PORT:8080,
+        //... all you ENV vars goes here for development mode
+      },
+      env_production: {
+        NODE_ENV: 'production',
+        PORT:8080,
+         //... all you ENV vars goes here for production mode
+      }
+  }
+]
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+{
+ 
+  apps : [
+    {
+      "name"       : "node",
+      "script"     : "/home/ec2-user/index.js",
+      "env" : {
+         PORT: 8000
+      }
+    },
+    {
+      "name"       : "node",
+      "script"     : "/home/ec2-user/index1.js",
+      "exec_mode"  : "cluster_mode",
+      "env_production" : {
+        "NODE_ENV": "production", "PORT": 3000
+      }
+    }
+
+  ],
+
+
+
+  /**
+   * PM2 help you to deploy apps over your servers
+   * For more help go to :
+   * https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#deployment-pm2--090
+   */
+  deploy : {
+    production : {
+      user : "node",
+      host : "node01.mydomain.com",
+      ref  : "origin/master",
+      repo : "git@bitbucket.org:mydomain/mydomain-myapp.git",
+      path : "/var/production/myapp.mydomain.com-production/",
+      "post-deploy" : "npm prune && npm install -l && pm2 startOrGracefulReload ecosystem.json --env production",
+      env  : {
+        NODE_ENV: "production",
+        PORT: 8000
+      }
+    },
+    staging : {
+      user : "node",
+      host : "node01.mydomain.com",
+      ref  : "origin/master",
+      repo : "git@bitbucket.org:mydomain/mydomain-myapp.git",
+      path : "/var/production/myapp.mydomain.com-staging/",
+      "post-deploy" : "npm prune && npm install -l && pm2 startOrGracefulReload ecosystem.json --env staging",
+      env  : {
+        NODE_ENV: "staging",
+        PORT: 3000
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+module.exports = {
+  apps : [
+    {
+      "name"       : "node",
+      "script"     : "/home/ec2-user/index.js",
+      "exec_mode"  : "cluster_mode",
+      "env_production" : {
+        "NODE_ENV": "production", "PORT": 8000
+      }
+    },
+    {
+      "name"       : "node1",
+      "script"     : "/home/ec2-user/index1.js",
+      "exec_mode"  : "cluster_mode",
+      "env_production" : {
+        "NODE_ENV": "production", "PORT": 3000
+      }
+    }
+
+  ],
+~
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+pm2 start ecosystem.config.js --only "api-app,worker-app"
